@@ -1,0 +1,106 @@
+{% extends 'basic.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Banner -->
+<section class="hero mb-5" style="position: relative; height: 60vh; padding-top: 80px; background: url('{% static 'assets/img/img7.jpg' %}') center/cover no-repeat; display: flex; align-items: center; justify-content: center;">
+  <div style="content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4);"></div>
+  <div class="hero-overlay" style="position: relative; z-index: 1; text-align: center; color: #fff; padding: 0 1rem;">
+    <h1 style="font-size: 3.5rem; font-weight: 700; text-shadow: 2px 2px 5px rgba(0,0,0,0.6);">Discover Events, Book Adventures</h1>
+    <p style="font-size: 1.25rem; line-height: 1.6; max-width: 700px; margin: 1rem auto;">
+      Explore travel events across India and beyond. Book your spot now and start your next adventure!
+    </p>
+    <a href="#events" class="btn btn-primary btn-lg" style="border-radius: 30px; padding: 12px 25px; font-size: 1.1rem;">Explore Now</a>
+  </div>
+</section>
+
+<!-- Search Bar -->
+<div class="container mb-4">
+  <form action="{% url 'viewe_all_event' %}" method="get" class="row justify-content-center">
+    <div class="col-12 col-md-6">
+      <div class="input-group">
+        <input
+          type="text"
+          name="q"
+          class="form-control"
+          placeholder="Search events..."
+          value="{{ search_query }}"
+        >
+        <button class="btn btn-primary" type="submit">
+          <i class="fa fa-search"></i>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Events Grid -->
+<div class="container" id="events">
+  <div class="row">
+    {% for e in events %}
+    <div class="col-md-6 col-lg-4 mb-4">
+      <div class="card h-100 shadow-sm border-0">
+        {% if e.image %}
+        <img
+          src="{{ e.image.url }}"
+          class="card-img-top"
+          alt="{{ e.name }}"
+          style="height:200px; object-fit:cover;"
+        >
+        {% else %}
+        <img
+          src="{% static 'assets/img/img6.jpg' %}"
+          class="card-img-top"
+          alt="Event Image"
+          style="height:200px; object-fit:cover;"
+        >
+        {% endif %}
+
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ e.name }}</h5>
+          <p class="text-muted mb-1">
+            <i class="fa-solid fa-location-dot me-1"></i>{{ e.location }}
+          </p>
+          <p class="mb-1"><strong>Date:</strong> {{ e.date }}</p>
+          <p class="mb-1"><strong>Organizer:</strong>
+            {% if e.organizer %}
+              <a href="{% url 'view_user_profile' e.organizer.id %}">
+                {{ e.organizer.first_name }} {{ e.organizer.last_name }}
+              </a>
+            {% else %}
+              Unknown
+            {% endif %}
+          </p>
+          <p class="mb-3"><strong>Max Participants:</strong> {{ e.max_participants }}</p>
+
+          {% if e.tags.all %}
+          <div class="mb-2">
+            {% for tag in e.tags.all %}
+              <span class="badge bg-primary">{{ tag.name }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="mt-auto">
+            {% if request.user in e.participants.all %}
+            <a href="{% url 'book_unbook' e.pk %}" class="btn btn-outline-danger w-100">
+              <i class="fa fa-times-circle"></i> Unbook
+            </a>
+            {% else %}
+            <a href="{% url 'book_unbook' e.pk %}" class="btn btn-success w-100">
+              <i class="fa fa-calendar-check"></i> Book Now
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center">
+      <p class="text-muted">No events available at the moment.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}
